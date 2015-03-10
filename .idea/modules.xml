@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../PyQT4_test/PyQT4_TestForm/.idea/PyQT4_TestForm.iml" filepath="$PROJECT_DIR$/../PyQT4_test/PyQT4_TestForm/.idea/PyQT4_TestForm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../VboxCenter/.idea/VboxCenter.iml" filepath="$PROJECT_DIR$/../VboxCenter/.idea/VboxCenter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/vboxserver.iml" filepath="$PROJECT_DIR$/.idea/vboxserver.iml" />
+    </modules>
+  </component>
+</project>
+
