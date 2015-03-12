@@ -11,7 +11,6 @@ import threading
 import select
 from forms.server import *
 from VboxCtrl import VboxControl
-from win32com import client
 import pythoncom
 from FTPServer import FtpServer
 
@@ -23,6 +22,9 @@ class Main_processor(QThread): #注意继承QThread
         self.listen_sock=None
         self.thread_sock=None#负责socket通讯与业务处理的子线程
         self.server_stop_flag=False#服务停止信号
+        #创建vm主文件夹(如果无)
+        if os.path.isdir((os.getenv('VBOX_MSI_INSTALL_PATH'))[:2]+'\\VboxMachine')==False:
+            os.mkdir((os.getenv('VBOX_MSI_INSTALL_PATH'))[:2]+'\\VboxMachine')
         #创建FTP文件夹
         self.FtpPath=(os.getenv('VBOX_MSI_INSTALL_PATH'))[:2]+'\\VboxMachine\\Ftp_Folder'
         if os.path.isdir(self.FtpPath)==False:
