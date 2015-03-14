@@ -332,13 +332,13 @@ class VboxControl():
 
     #查询虚拟机存储媒体介质与存储控制器附加关系(list)
     #返回值:虚拟机存储媒体介质与存储控制器附加关系对象信息(list)
-    #参数结构:[VM_name(str),name(str)(StorageController.name)]
-    #结构:[VM_name(str),name(str)(StorageController.name),name(str)(medium.name),port(int),device=0(int),type(int)(搭配常数字典DeviceType)]
+    #参数结构:[name(str)(StorageController.name)]
+    #结构:[name(str)(StorageController.name),name(str)(medium.name),port(int),device=0(int),type(int)(搭配常数字典DeviceType)]
     def get_guest_mediumattachmen(self,listset):
         try:
             Imachine=self.vbox.FindMachine(listset[1])
             ma_list=Imachine.GetMediumAttachmentsOfController(listset[2])
-            result=['success',listset[0],listset[1],listset[2]]
+            result=['success',listset[0],listset[2]]
             #result列表内,每5个元素分别存放一个MediumAttachment对象的信息.如此循环
             for ma in ma_list:
                 if ma.Medium is not None:
@@ -356,12 +356,12 @@ class VboxControl():
 
     #查询虚拟机存储媒体介质(medium)对象信息
     #返回值:虚拟机存储媒体介质(medium)对象信息(list)
-    #结构:[VM_name(str),format(str),DeviceType(int)(搭配常数字典DeviceType),size(long,Byte),logicalSize(long,Byte)]
+    #结构:[name(str),format(str),DeviceType(int)(搭配常数字典DeviceType),size(long,Byte),logicalSize(long,Byte)]
     def get_guest_mediums(self,listset):
         try:
             Imachine=self.vbox.FindMachine(listset[1])
             ma_list=Imachine.GetMediumAttachmentsOfController(listset[2])
-            result=['success',listset[0],listset[1],]
+            result=['success',listset[0],]
             #result列表内,每5个元素分别存放一个Medium对象的信息.如此循环
             for ma in ma_list:
                 result.append(ma.Medium.Name)
@@ -371,17 +371,17 @@ class VboxControl():
                 result.append(ma.Medium.LogicalSize)
             return result
         except BaseException,e:
-            result=['failure',listset[0],listset[1],str(e)]
+            result=['failure',listset[0],str(e)]
             print(str(e))
             return result
 
     #查询虚拟机网络适配器信息
     #返回值:虚拟机网络适配器对象信息(list
-    #结构:[VM_name(str),slot(long),enabled(int 1/0),MACAddress(str),attachmentType(int)(需搭配常数字典NetworkAttachmentType),BridgedInterface(str),adapterType(int)(需搭配常数字典NetworkAdapterType),cableConnected(bool)]
+    #结构:[slot(long),enabled(int 1/0),MACAddress(str),attachmentType(int)(需搭配常数字典NetworkAttachmentType),BridgedInterface(str),adapterType(int)(需搭配常数字典NetworkAdapterType),cableConnected(bool)]
     def get_guest_networkadapters(self,listset):
         try:
             Imachine=self.vbox.FindMachine(listset[1])
-            result=['success',listset[0],listset[1],]
+            result=['success',listset[0],]
              #result列表内,每6个元素分别存放一个NetworkAdapter对象的信息.如此循环
             for i in range(0,8):
                 na=Imachine.GetNetworkAdapter(i)
@@ -394,7 +394,7 @@ class VboxControl():
                 result.append(na.CableConnected)
             return result
         except BaseException,e:
-            result=['failure',listset[0],listset[1],str(e)]
+            result=['failure',listset[0],str(e)]
             print(str(e))
             return result
 
@@ -439,8 +439,9 @@ class VboxControl():
             LocalPercol.SetupMetrics(None,(Imachine,),2,5)
             CPU_Load=(LocalPercol.QueryMetricsData(('Guest/CPU/Load/User',),(Imachine,))[0])[1]
             #内存数据单位为KB
-            MEM_Free=(LocalPercol.QueryMetricsData(('Guest/RAM/Usage/Free',),(Imachine,))[0])[1]
-            return ['success',listset[0],listset[1],CPU_Load,MEM_Free]
+            Mem_Free=(LocalPercol.QueryMetricsData(('Guest/RAM/Usage/Free',),(Imachine,))[0])[1]
+            Mem_Usage=(Imachine.MemorySize-Mem_Free/1024)*100/Imachine.MemorySize
+            return ['success',listset[0],listset[1],CPU_Load/10000,Mem_Usage]
         except BaseException,e:
             result=['failure',listset[0],listset[1],str(e)]
             print(str(e))
@@ -831,7 +832,6 @@ class VboxControl():
         'GET_HOST_MEMSIZE':get_host_memsize,
         'GET_HOST_MEM_AVAIL':get_host_mem_avail,
         'GET_HOST_STORAGEINFO':get_host_storageinfo,
-        #'GET_HOST_NETWORKADAPETER':get_host_networkadapeter,(待定)
         'GET_GUEST_LIST':get_guest_list,
         'GET_GUEST_POWERSTATE':get_guest_powerstate,
         'GET_GUEST_CPUCOUNT':get_guest_cpucount,
@@ -843,7 +843,6 @@ class VboxControl():
         'GET_GUEST_MEMSIZE':get_guest_memsize,
         'SET_GUEST_MEMSIZE':set_guest_memsize,
         'GET_GUEST_PERFORMANCE':get_guest_performance,
-        'GET_GUEST_POWERSTATE':get_guest_powerstate,
         'SET_GUEST_NAME':set_guest_name,
         'GET_GUEST_OSVERSION':get_guest_osversion,
         'SET_GUEST_OSVERSION':set_guest_osversion,
@@ -865,7 +864,6 @@ class VboxControl():
         'CREATE_NEW_MACHINE':create_new_machine,
         'GET_GUEST_DESCRIPTION':get_guest_description,
         'SET_GUEST_DESCRIPTION':set_guest_description,
-        'GET_GUEST_PERFORMANCE':get_guest_performance,
         'MACHINE_POWERON':machine_poweron,
         'MACHINE_POWEROFF':machine_poweroff,
         }
