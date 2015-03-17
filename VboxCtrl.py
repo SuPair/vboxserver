@@ -325,7 +325,7 @@ class VboxControl():
 
     #查询虚拟机存储控制器对象信息
     #返回值:虚拟机存储控制器对象信息(list)
-    #结构:[VM_Name(str),Bus(int)(搭配常数字典StorageBus),ControllerType(int)(搭配常数字典StorageControllerType),useHostIOCache(bool)]
+    #结构:[VM_Name(str),SC_Name(str),Bus(int)(搭配常数字典StorageBus),ControllerType(int)(搭配常数字典StorageControllerType),useHostIOCache(bool)]
     def get_guest_storagectrls(self,listset):
         try:
             Imachine=self.vbox.FindMachine(listset[1])
@@ -347,18 +347,19 @@ class VboxControl():
     #查询虚拟机存储媒体介质与存储控制器附加关系(list)
     #返回值:虚拟机存储媒体介质与存储控制器附加关系对象信息(list)
     #参数结构:[name(str)(StorageController.name)]
-    #结构:[name(str)(StorageController.name),name(str)(medium.name),port(int),device=0(int),type(int)(搭配常数字典DeviceType)]
+    #结构:[VM_Name,SC_name(str)(StorageController.name),Med_name(str)(medium.name),port(int),device=0(int),type(int)(搭配常数字典DeviceType)]
     def get_guest_mediumattachmen(self,listset):
         try:
             Imachine=self.vbox.FindMachine(listset[1])
             ma_list=Imachine.GetMediumAttachmentsOfController(listset[2])
-            result=['success',listset[0],listset[2]]
+            result=['success',listset[0],listset[1]]
             #result列表内,每5个元素分别存放一个MediumAttachment对象的信息.如此循环
             for ma in ma_list:
+                result.append(ma.Controller)
                 if ma.Medium is not None:
                     result.append(ma.Medium.Name)
                 else:
-                     result.append('None')
+                     result.append(None)
                 result.append(ma.Port)
                 result.append(ma.Device)
                 result.append(ma.Type)
@@ -397,7 +398,7 @@ class VboxControl():
     def get_guest_networkadapters(self,listset):
         try:
             Imachine=self.vbox.FindMachine(listset[1])
-            result=['success',listset[0],]
+            result=['success',listset[0],listset[1]]
              #result列表内,每6个元素分别存放一个NetworkAdapter对象的信息.如此循环
             for i in range(0,8):
                 na=Imachine.GetNetworkAdapter(i)
@@ -500,6 +501,7 @@ class VboxControl():
             if os.path.isdir(SF_Path)==False:
                 os.mkdir(SF_Path)
             Imachine_mutable.CreateSharedFolder('SharedFolder',SF_Path,True,True)
+            Imachine_mutable.Description=listset[2]
             #修改结束,保存配置
             Imachine_mutable.SaveSettings()
             #最后解锁虚拟机
@@ -526,7 +528,7 @@ class VboxControl():
         except BaseException,e:
             if self.session.State==2:
                 self.unlock(Imachine)
-            result=['failure',listset[0],listset[1],str(e)]
+            result=['failure',listset[0],listset[1],listset[2],str(e)]
             print(str(e))
             return result
 
@@ -543,7 +545,7 @@ class VboxControl():
         except BaseException,e:
             if self.session.State==2:
                 self.unlock(Imachine)
-            result=['failure',listset[0],listset[1],str(e)]
+            result=['failure',listset[0],listset[1],listset[2],str(e)]
             print(str(e))
             return result
 
@@ -556,11 +558,11 @@ class VboxControl():
             Imachine_mutable.Description=listset[2]
             Imachine_mutable.SaveSettings()
             self.unlock(Imachine)
-            return ['success',listset[0],listset[1],listset[len(listset)-1]]
+            return ['success',listset[0],listset[1],listset[2],listset[len(listset)-1]]
         except BaseException,e:
             if self.session.State==2:
                 self.unlock(Imachine)
-            result=['failure',listset[0],listset[1],str(e)]
+            result=['failure',listset[0],listset[1],listset[2],str(e)]
             print(str(e))
             return result
 
@@ -573,11 +575,11 @@ class VboxControl():
             Imachine_mutable.MemorySize=int(listset[2])
             Imachine_mutable.SaveSettings()
             self.unlock(Imachine)
-            return ['success',listset[0],listset[1],listset[len(listset)-1]]
+            return ['success',listset[0],listset[1],listset[2],listset[len(listset)-1]]
         except BaseException,e:
             if self.session.State==2:
                 self.unlock(Imachine)
-            result=['failure',listset[0],listset[1],str(e)]
+            result=['failure',listset[0],listset[1],listset[2],str(e)]
             print(str(e))
             return result
 
@@ -591,11 +593,11 @@ class VboxControl():
                  Imachine_mutable.SetBootOrder(i,int(listset[i+1]))
              Imachine_mutable.SaveSettings()
              self.unlock(Imachine)
-             return ['success',listset[0],listset[1],listset[len(listset)-1]]
+             return ['success',listset[0],listset[1],listset[2],listset[3],listset[4],listset[5],listset[len(listset)-1]]
          except BaseException,e:
             if self.session.State==2:
                 self.unlock(Imachine)
-            result=['failure',listset[0],listset[1],str(e)]
+            result=['failure',listset[0],listset[1],listset[2],listset[3],listset[4],listset[5],str(e)]
             print(str(e))
             return result
 
@@ -608,11 +610,11 @@ class VboxControl():
             Imachine_mutable.CPUCount=int(listset[2])
             Imachine_mutable.SaveSettings()
             self.unlock(Imachine)
-            return ['success',listset[0],listset[1],listset[2]listset[len(listset)-1]]
+            return ['success',listset[0],listset[1],listset[2],listset[len(listset)-1]]
         except BaseException,e:
             if self.session.State==2:
                 self.unlock(Imachine)
-            result=['failure',listset[0],listset[1],listset[2]str(e)]
+            result=['failure',listset[0],listset[1],listset[2],str(e)]
             print(str(e))
             return result
 
@@ -636,11 +638,11 @@ class VboxControl():
             Imachine_mutable.CPUExecutionCap=int(listset[2])
             Imachine_mutable.SaveSettings()
             self.unlock(Imachine)
-            return ['success',listset[0],listset[1],listset[len(listset)-1]]
+            return ['success',listset[0],listset[1],listset[2],listset[len(listset)-1]]
         except BaseException,e:
             if self.session.State==2:
                 self.unlock(Imachine)
-            result=['failure',listset[0],listset[1],str(e)]
+            result=['failure',listset[0],listset[1],listset[2],str(e)]
             print(str(e))
             return result
 
@@ -653,11 +655,11 @@ class VboxControl():
             Imachine_mutable.VRAMSize=int(listset[2])
             Imachine_mutable.SaveSettings()
             self.unlock(Imachine)
-            return ['success',listset[0],listset[1],listset[len(listset)-1]]
+            return ['success',listset[0],listset[1],listset[2],listset[len(listset)-1]]
         except BaseException,e:
             if self.session.State==2:
                 self.unlock(Imachine)
-            result=['failure',listset[0],listset[1],str(e)]
+            result=['failure',listset[0],listset[1],listset[2],str(e)]
             print(str(e))
             return result
 
@@ -669,11 +671,11 @@ class VboxControl():
             Imachine=self.vbox.FindMachine(listset[1])
             Imachine_mutable=self.lock(Imachine)
             sc=Imachine_mutable.GetStorageControllerByName(listset[2])
-            sc.ControllerType=listset[5]
-            sc.UseHostIOCache=listset[6]
+            sc.ControllerType=listset[3]
+            sc.UseHostIOCache=listset[4]
             Imachine_mutable.SaveSettings()
             self.unlock(Imachine)
-            return ['success',listset[0],listset[1],listset[len(listset)-1]]
+            return ['success',listset[0],listset[1],listset[2],listset[3],listset[4],listset[len(listset)-1]]
         except BaseException,e:
             if self.session.State==2:
                 self.unlock(Imachine)
@@ -697,11 +699,11 @@ class VboxControl():
             na.CableConnected=listset[8]
             Imachine_mutable.SaveSettings()
             self.unlock(Imachine_mutable)
-            return ['success',listset[0],listset[1],listset[len(listset)-1]]
+            return ['success',listset[0],listset[1],listset[2],listset[3],listset[4],listset[5],listset[6],listset[7],listset[8],listset[len(listset)-1]]
         except BaseException,e:
             if self.session.State==2:
                 self.unlock(Imachine)
-            result=['failure',listset[0],listset[1],str(e)]
+            result=['failure',listset[0],listset[1],listset[2],listset[3],listset[4],listset[5],listset[6],listset[7],listset[8],str(e)]
             print(str(e))
             return result
 
@@ -742,7 +744,7 @@ class VboxControl():
                 Mediunm_DVD=self.vbox.OpenMedium(ISO_path+'\\'+listset[4],self.vboxCnst.DeviceType_DVD,self.vboxCnst.AccessMode_ReadOnly,True)
                 Imachine_mutable.MountMedium(listset[2],int(listset[3]),0,Mediunm_DVD,True)
                 self.unlock(Imachine)
-            return ['success',listset[0],listset[1],listset[len(listset)-1]]
+            return ['success',listset[0],listset[len(listset)-1]]
         except BaseException,e:
             if self.session.State==2:
                 self.unlock(Imachine)
@@ -806,7 +808,7 @@ class VboxControl():
                 if pid_re.search(str_p):
                     New_VirtualBoxPidSet.append(str_p.split('pid=')[1].split(',')[0]  )
             New_VirtualBoxPidSet=set(New_VirtualBoxPidSet)
-            #集合相减,得到此次运行虚拟机而运行的VirtualBox.exe的进程的PID号
+            #集合相减,得到此次运行虚拟机而产生的VirtualBox.exe的进程的PID号
             PID_List=New_VirtualBoxPidSet-Old_VirtualBoxPidSet
             result=['success',listset[0],listset[1],]
             for pid in PID_List:
