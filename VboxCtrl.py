@@ -830,12 +830,13 @@ class VboxControl():
                 if MachineConsole is not None:
                     MachineConsole.PowerDown()
                 else:
-                    for i in range(2, len(listset)):
-                        psutil.pid_exists(int(listset[i]))
-                        os.kill(int(listset[i]), 9)
+                    for i in range(2, len(listset)-1):
+                        if psutil.pid_exists(int(listset[i])):
+                            os.kill(int(listset[i]), 9)
             else:
-                for i in range(2, len(listset)):
-                    os.kill(int(listset[i]), 9)
+                for i in range(2, len(listset)-1):
+                    if psutil.pid_exists(int(listset[i])):
+                        os.kill(int(listset[i]), 9)
             return ['success', listset[0], listset[1],listset[len(listset)-1]]
         except BaseException, e:
             result = ['failure', listset[0], listset[1], str(e)]
