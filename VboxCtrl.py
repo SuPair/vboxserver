@@ -665,14 +665,15 @@ class VboxControl():
 
     #设定虚拟机存储控制器对象信息
     #返回值:无
-    #参数结构:[VM_Name(str),SC_Name(str),ControllerType(int)(搭配常数字典StorageControllerType),useHostIOCache(bool)]
+    #参数结构:[VM_Name(str),SC_Name(str),ControllerType(int)(搭配常数字典StorageControllerType),useHostIOCache(int)]
     def set_guest_storagectrls(self,listset):
+        #useHostIOCache的值到底为bool类型还是1/0.(目前假设int类型1/0)
         try:
             Imachine=self.vbox.FindMachine(listset[1])
             Imachine_mutable=self.lock(Imachine)
             sc=Imachine_mutable.GetStorageControllerByName(listset[2])
-            sc.ControllerType=listset[3]
-            sc.UseHostIOCache=listset[4]
+            sc.ControllerType=int(listset[3])
+            sc.UseHostIOCache=int(listset[4])
             Imachine_mutable.SaveSettings()
             self.unlock(Imachine)
             return ['success',listset[0],listset[1],listset[2],listset[3],listset[4],listset[len(listset)-1]]
@@ -687,16 +688,17 @@ class VboxControl():
     #返回值:无
     #参数结构:[VM_name(str),slot(long),enabled(int 1/0),MACAddress(str),attachmentType(int)(需搭配常数字典NetworkAttachmentType),BridgedInterface(str),adapterType(int)(需搭配常数字典NetworkAdapterType),cableConnected(bool)]
     def set_guest_networkadapters(self,listset):
+        #CableConnected的类型假设为int,有效值为1,0
         try:
             Imachine=self.vbox.FindMachine(listset[1])
             Imachine_mutable=self.lock(Imachine)
-            na=Imachine_mutable.GetNetworkAdapter(listset[2])
-            na.Enabled=listset[3]
+            na=Imachine_mutable.GetNetworkAdapter(int(listset[2]))
+            na.Enabled=int(listset[3])
             na.MACAddress=listset[4]
             na.AttachmentType=int(listset[5])
             na.bridgedInterface=listset[6]
             na.AdapterType=int(listset[7])
-            na.CableConnected=listset[8]
+            na.CableConnected=int(listset[8])
             Imachine_mutable.SaveSettings()
             self.unlock(Imachine_mutable)
             return ['success',listset[0],listset[1],listset[2],listset[3],listset[4],listset[5],listset[6],listset[7],listset[8],listset[len(listset)-1]]
