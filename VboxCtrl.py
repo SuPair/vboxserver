@@ -667,7 +667,7 @@ class VboxControl():
     #返回值:无
     #参数结构:[VM_Name(str),SC_Name(str),ControllerType(int)(搭配常数字典StorageControllerType),useHostIOCache(int)]
     def set_guest_storagectrls(self,listset):
-        #useHostIOCache的值到底为bool类型还是1/0.(目前假设int类型1/0)
+        #useHostIOCache的值int类型 1/0)
         try:
             Imachine=self.vbox.FindMachine(listset[1])
             Imachine_mutable=self.lock(Imachine)
@@ -746,7 +746,7 @@ class VboxControl():
                 Mediunm_DVD=self.vbox.OpenMedium(ISO_path+'\\'+listset[4],self.vboxCnst.DeviceType_DVD,self.vboxCnst.AccessMode_ReadOnly,True)
                 Imachine_mutable.MountMedium(listset[2],int(listset[3]),0,Mediunm_DVD,True)
                 self.unlock(Imachine)
-            return ['success',listset[0],listset[len(listset)-1]]
+            return ['success',listset[0],listset[1],listset[2],listset[len(listset)-1]]
         except BaseException,e:
             if self.session.State==2:
                 self.unlock(Imachine)
