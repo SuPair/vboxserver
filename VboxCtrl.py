@@ -380,11 +380,14 @@ class VboxControl():
             result=['success',listset[0],]
             #result列表内,每5个元素分别存放一个Medium对象的信息.如此循环
             for ma in ma_list:
-                result.append(ma.Medium.Name)
-                result.append(ma.Medium.Format)
-                result.append(ma.Medium.DeviceType)
-                result.append(ma.Medium.Size)
-                result.append(ma.Medium.LogicalSize)
+                if ma.Medium is not None:
+                    print('ma.Medium')
+                    print(ma.Medium)
+                    result.append(ma.Medium.Name)
+                    result.append(ma.Medium.Format)
+                    result.append(ma.Medium.DeviceType)
+                    result.append(ma.Medium.Size)
+                    result.append(ma.Medium.LogicalSize)
             result.append(listset[len(listset)-1])
             return result
         except BaseException,e:
