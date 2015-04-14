@@ -222,10 +222,14 @@ class VboxControl():
         try:
             result=['success',listset[0],]
             machine_list=self.vbox.GetMachinesByGroups(('',))
-            for vm in machine_list:
-                result.append(vm.Name)
-            result.append(listset[len(listset)-1])
-            return result
+            if machine_list is None:
+                result.append(listset[len(listset)-1])
+                return result
+            else:
+                for vm in machine_list:
+                    result.append(vm.Name)
+                result.append(listset[len(listset)-1])
+                return result
         except BaseException,e:
             result=['failure',listset[0],str(e)]
             print(str(e))
