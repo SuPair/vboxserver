@@ -381,18 +381,18 @@ class VboxControl():
         try:
             Imachine=self.vbox.FindMachine(listset[1])
             ma_list=Imachine.GetMediumAttachmentsOfController(listset[2])
-            result=['success',listset[0],]
+            result=['success',listset[0],listset[1],]
             #result列表内,每5个元素分别存放一个Medium对象的信息.如此循环
             for ma in ma_list:
                 if ma.Medium is not None:
-                    print('ma.Medium')
-                    print(ma.Medium)
                     result.append(ma.Medium.Name)
                     result.append(ma.Medium.Format)
                     result.append(ma.Medium.DeviceType)
                     result.append(ma.Medium.Size)
                     result.append(ma.Medium.LogicalSize)
             result.append(listset[len(listset)-1])
+            print('Medium')
+            print(result)
             return result
         except BaseException,e:
             result=['failure',listset[0],str(e)]
