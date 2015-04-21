@@ -27,7 +27,7 @@ class VboxControl():
         self.syspro=self.vbox.SystemProperties
         self.PerformanceCache={}#虚拟机性能字典,虚拟机名称为键,性能数据为值
         self.VboxInstallPath=os.getenv('VBOX_MSI_INSTALL_PATH')
-        self.FtpPath=(os.getenv('VBOX_MSI_INSTALL_PATH'))[:2]+'\\Ftp_Folder'
+        self.FtpPath=(os.getenv('VBOX_MSI_INSTALL_PATH'))[:2]+'\\VboxMachine\\Ftp_Folder'
         self.wmi_obj=wmi.WMI()
         #self.vm_list=[]
         #vbox_init()
@@ -462,13 +462,16 @@ class VboxControl():
     def get_guest_performance(self,listset): #OK
         try:
             Imachine=self.vbox.FindMachine(listset[1])
-            LocalPercol=self.vbox.PerformanceCollector
-            LocalPercol.SetupMetrics(None,(Imachine,),2,5)
-            CPU_Load=(LocalPercol.QueryMetricsData(('Guest/CPU/Load/User',),(Imachine,))[0])[1]
-            #内存数据单位为KB
-            Mem_Free=(LocalPercol.QueryMetricsData(('Guest/RAM/Usage/Free',),(Imachine,))[0])[1]
-            Mem_Usage=(Imachine.MemorySize-Mem_Free/1024)*100/Imachine.MemorySize
-            return ['success',listset[0],listset[1],CPU_Load/10000,Mem_Usage,listset[len(listset)-1]]
+            if Imachine.State == 1:
+                 return ['success',listset[0],listset[1],0,0,listset[len(listset)-1]]
+            else:
+                LocalPercol=self.vbox.PerformanceCollector
+                LocalPercol.SetupMetrics(None,(Imachine,),2,5)
+                CPU_Load=(LocalPercol.QueryMetricsData(('Guest/CPU/Load/User',),(Imachine,))[0])[1]
+                #内存数据单位为KB
+                Mem_Free=(LocalPercol.QueryMetricsData(('Guest/RAM/Usage/Free',),(Imachine,))[0])[1]
+                Mem_Usage=(Imachine.MemorySize-Mem_Free/1024)*100/Imachine.MemorySize
+                return ['success',listset[0],listset[1],CPU_Load/10000,Mem_Usage,listset[len(listset)-1]]
         except BaseException,e:
             result=['failure',listset[0],listset[1],str(e)]
             print(str(e))
@@ -707,7 +710,7 @@ class VboxControl():
             na.AdapterType=int(listset[7])
             na.CableConnected=int(listset[8])
             Imachine_mutable.SaveSettings()
-            self.unlock(Imachine_mutable)
+            self.unlock(Imachine)
             return ['success',listset[0],listset[1],listset[2],listset[3],listset[4],listset[5],listset[6],listset[7],listset[8],listset[len(listset)-1]]
         except BaseException,e:
             if self.session.State==2:
@@ -752,7 +755,7 @@ class VboxControl():
                 med_dvd_old.Close()
                 Mediunm_DVD=self.vbox.OpenMedium(ISO_path+'\\'+listset[4],self.vboxCnst.DeviceType_DVD,self.vboxCnst.AccessMode_ReadOnly,True)
                 Imachine_mutable.MountMedium(listset[2],int(listset[3]),0,Mediunm_DVD,True)
-                self.unlock(Imachine)
+            self.unlock(Imachine)
             return ['success',listset[0],listset[1],listset[2],listset[len(listset)-1]]
         except BaseException,e:
             if self.session.State==2:
@@ -802,11 +805,11 @@ class VboxControl():
             self.SessionDict[listset[1]]=LocalSession
             Imachine_mutable=LocalSession.Machine
             MachineConsole=LocalSession.Console
-            if MachineConsole is not None:
-                MachineConsole.PowerUp()
-            else:
-                LocalSession.UnlockMachine()
-                Imachine.LaunchVMProcess(LocalSession,"gui",'')
+            # if MachineConsole is not None:
+            #     MachineConsole.PowerUp()
+            # else:
+            LocalSession.UnlockMachine()
+            Imachine.LaunchVMProcess(LocalSession,"gui",'')
             #虚拟机启动完成
             #查询运行虚拟机后所有的VirtualBox.exe进程的PID号
             p_list=psutil.get_process_list()

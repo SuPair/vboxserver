@@ -178,7 +178,7 @@ class Main_processor(QThread): #注意继承QThread
                 elif commandlist[0]=='ftp_start':
                     try:
                         self.FtpRun()
-                        sock.sendall('success')
+                        sock.sendall('success|ftp_start')
                         continue
                     except BaseException,e:
                         sock.sendall('|'.join('failure',str(e)))
@@ -187,7 +187,7 @@ class Main_processor(QThread): #注意继承QThread
                 elif commandlist[0]=='ftp_close':
                     try:
                         self.FtpClose()
-                        sock.sendall('success')
+                        sock.sendall('success|ftp_close')
                         continue
                     except BaseException,e:
                         result=('failure',str(e))
